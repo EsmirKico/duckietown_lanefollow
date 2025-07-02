@@ -1,0 +1,12 @@
+<launch>
+    <arg name="veh" default="$(env VEHICLE_NAME)"/>
+    <arg name="config" default="baseline"/>
+    <arg name="param_file_name" default="default"/>
+    
+    <group ns="$(arg veh)">
+        <node pkg="dynamic_obstacle_avoidance" type="led_detection_node.py" name="led_detection_node" output="screen">
+            <remap from="~image" to="camera_node/image/compressed"/>
+            <rosparam file="$(find dynamic_obstacle_avoidance)/config/led_detection_node/$(arg param_file_name).yaml" command="load"/>
+        </node>
+    </group>
+</launch> 

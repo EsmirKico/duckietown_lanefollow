@@ -1,0 +1,59 @@
+===============================================================================
+🚀 QUICK START: Enhanced Dynamic Obstacle Avoidance
+===============================================================================
+
+WHAT CHANGED?
+- Your Duckiebot now OVERTAKES obstacles instead of just stopping!
+- Optimized for DB21J Jetson Nano 4GB hardware
+
+OLD COMMANDS vs NEW COMMANDS:
+- OLD: dts devel build    →  NEW: catkin_make --pkg dynamic_obstacle_avoidance
+- OLD: dts devel run      →  NEW: ./deploy_db21j.sh launch jetson
+
+===============================================================================
+ESSENTIAL COMMANDS:
+===============================================================================
+
+1. BUILD:
+   cd ~/catkin_ws
+   catkin_make --pkg dynamic_obstacle_avoidance
+   source devel/setup.bash
+
+2. ONE-TIME SETUP:
+   chmod +x src/duckietown_lanefollow/packages/dynamic_obstacle_avoidance/scripts/deploy_db21j.sh
+   ./src/duckietown_lanefollow/packages/dynamic_obstacle_avoidance/scripts/deploy_db21j.sh setup
+
+3. RUN (replaces "dts devel run"):
+   ./src/duckietown_lanefollow/packages/dynamic_obstacle_avoidance/scripts/deploy_db21j.sh launch jetson
+
+===============================================================================
+ALTERNATIVE LAUNCH (if script fails):
+===============================================================================
+
+   roslaunch duckietown_demos lane_following_jetson_optimized.launch veh:=$VEHICLE_NAME
+
+===============================================================================
+TESTING:
+===============================================================================
+
+   ./src/duckietown_lanefollow/packages/dynamic_obstacle_avoidance/scripts/deploy_db21j.sh test
+   ./src/duckietown_lanefollow/packages/dynamic_obstacle_avoidance/scripts/deploy_db21j.sh info
+
+===============================================================================
+WHAT YOU'LL SEE:
+===============================================================================
+
+✅ Smooth overtaking around duckies and other Duckiebots
+✅ "🔥 CUDA available" messages (hardware optimization)
+✅ No more infinite stopping at obstacles
+✅ Real-time obstacle detection and avoidance
+
+===============================================================================
+NEED HELP?
+===============================================================================
+
+- Read: DEPLOYMENT_GUIDE.md (detailed instructions)
+- Read: packages/dynamic_obstacle_avoidance/README.md (full documentation)
+- Run: ./deploy_db21j.sh help
+
+=============================================================================== 

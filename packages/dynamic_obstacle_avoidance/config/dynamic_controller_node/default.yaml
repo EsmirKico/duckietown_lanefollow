@@ -1,0 +1,7 @@
+nr_steps: 4
+transition_time: 4.0
+lanewidth: 0.22
+leftlane_time: 3
+gain_multiplier: 1.3
+dist_max: 0.7
+min_distance: 0.15 

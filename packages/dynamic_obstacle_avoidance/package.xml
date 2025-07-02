@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>dynamic_obstacle_avoidance</name>
+  <version>0.1.0</version>
+  <description>Dynamic obstacle avoidance for lane following with visual obstacle perception</description>
+
+  <maintainer email="student@duckietown.org">Duckietown Student</maintainer>
+  <license>GPLv3</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <depend>rospy</depend>
+  <depend>duckietown_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>cv_bridge</depend>
+  <depend>message_generation</depend>
+  <depend>message_runtime</depend>
+
+  <export>
+  </export>
+</package> 

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+    Jetson Nano Optimized Lane Following with Dynamic Obstacle Avoidance
+    Specifically designed for DB21J Duckiebot with NVIDIA Jetson Nano 4GB
+    
+    This launch file includes:
+    - Hardware-specific optimizations for Jetson Nano
+    - CUDA acceleration when available
+    - Memory management optimizations
+    - Performance tuning for real-time operation
+-->
+<launch>
+	<arg name="veh" default="$(env VEHICLE_NAME)"/>
+    <arg name="demo_name" value="lane_following_jetson_optimized"/>
+    <arg name="config" default="jetson_optimized"/>
+	
+	<!-- Jetson Performance Optimization -->
+	<node pkg="dynamic_obstacle_avoidance" type="jetson_setup.sh" name="jetson_optimizer" output="screen" if="$(arg enable_jetson_optimization)"/>
+	<arg name="enable_jetson_optimization" default="true"/>
+
+	<!-- Include base master launch with optimized parameters -->
+	<include file="$(find duckietown_demos)/launch/master.launch">
+	    <!-- Basic arguments -->
+		<arg name="veh" value="$(arg veh)"/>
+        <arg name="demo_name" value="$(arg demo_name)"/>
+		<arg name="param_file_name" value="$(arg config)" />
+		<arg name="visualization" value="false" />  <!-- Disabled for performance -->
+
+		<!-- Basic functionalities -->
+		<arg name="line_detector_param_file_name" default="$(arg config)" />
+		<arg name="anti_instagram" default="true" />
+		<arg name="/camera/raw" value="true"/>
+		<arg name="/camera/rect" value="true"/>
+		<arg name="LED" value="true"/>
+        <arg name="/LED/emitter" value="true"/>
+		<arg name="/LED/pattern_switch" value="true"/>
+
+	    <!-- Lane Following stack -->
+	    <arg name="lane_following" value="true"/>
+	    <arg name="/lane_following/line_detection" value="true"/>
+	    <arg name="/lane_following/ground_projection" value="true"/>
+	    <arg name="/lane_following/lane_filter" value="true"/>
+	    <arg name="/lane_following/lane_controller" value="true"/>
+	    <arg name="/lane_following/stop_line_filter" value="true"/>
+		<arg name="apriltags" value="true" />
+		<arg name="object_detection" value="true"/>
+  	</include>
+
+    <!-- Jetson Optimized Dynamic Obstacle Avoidance -->
+    <group ns="$(arg veh)">
+        <!-- LED Detection Node with Jetson Optimizations -->
+        <node pkg="dynamic_obstacle_avoidance" type="led_detection_node.py" name="led_detection_node" output="screen" respawn="false">
+            <remap from="~image" to="camera_node/image/compressed"/>
+            <rosparam file="$(find dynamic_obstacle_avoidance)/config/jetson_optimized.yaml" command="load" ns="led_detection_node"/>
+            
+            <!-- Jetson specific parameters -->
+            <param name="use_jetson_optimization" value="true"/>
+            <param name="cuda_enabled" value="true"/>
+            <param name="memory_optimization" value="true"/>
+        </node>
+
+        <!-- Duckie Detection Node with Jetson Optimizations -->
+        <node pkg="dynamic_obstacle_avoidance" type="duckie_detection_node.py" name="duckie_detection_node" output="screen" respawn="false">
+            <remap from="~image" to="camera_node/image/compressed"/>
+            <remap from="~lane_pose" to="lane_filter_node/lane_pose"/>
+            <rosparam file="$(find dynamic_obstacle_avoidance)/config/jetson_optimized.yaml" command="load" ns="duckie_detection_node"/>
+            
+            <!-- Jetson specific parameters -->
+            <param name="use_jetson_optimization" value="true"/>
+            <param name="cuda_enabled" value="true"/>
+            <param name="memory_optimization" value="true"/>
+        </node>
+
+        <!-- Dynamic Controller Node with Jetson Optimizations -->
+        <node pkg="dynamic_obstacle_avoidance" type="dynamic_controller_node.py" name="dynamic_controller_node" output="screen" respawn="false">
+            <remap from="~car_cmd_in" to="lane_controller_node/car_cmd"/>
+            <remap from="~car_cmd" to="car_cmd_switch_node/cmd"/>
+            <remap from="~fsm_mode" to="fsm_node/mode"/>
+            <rosparam file="$(find dynamic_obstacle_avoidance)/config/jetson_optimized.yaml" command="load" ns="dynamic_controller_node"/>
+            
+            <!-- Jetson specific parameters -->
+            <param name="use_jetson_optimization" value="true"/>
+            <param name="control_frequency" value="25"/>
+            <param name="memory_cleanup_interval" value="500"/>
+        </node>
+        
+        <!-- Optional: System Monitor for Jetson Nano -->
+        <node pkg="dynamic_obstacle_avoidance" type="jetson_monitor.py" name="jetson_monitor" output="screen" if="$(arg enable_system_monitoring)">
+            <param name="monitor_frequency" value="1.0"/>  <!-- Monitor every second -->
+            <param name="temperature_warning" value="70"/>  <!-- Warn at 70°C -->
+            <param name="memory_warning" value="80"/>       <!-- Warn at 80% memory usage -->
+        </node>
+    </group>
+    
+    <arg name="enable_system_monitoring" default="false"/>
+    
+    <!-- Performance Monitoring (Optional) -->
+    <group if="$(arg enable_performance_monitoring)">
+        <node pkg="dynamic_obstacle_avoidance" type="performance_monitor.py" name="performance_monitor" output="screen">
+            <param name="log_frequency" value="10.0"/>  <!-- Log performance every 10 seconds -->
+        </node>
+    </group>
+    
+    <arg name="enable_performance_monitoring" default="false"/>
+	
+</launch> 

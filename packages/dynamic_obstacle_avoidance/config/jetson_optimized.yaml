@@ -1,0 +1,75 @@
+# Jetson Nano Optimized Configuration for DB21J Duckiebot
+# This configuration is specifically tuned for the NVIDIA Jetson Nano 4GB
+# hardware to provide optimal performance for dynamic obstacle avoidance
+
+# LED Detection Node - Optimized for Jetson Nano
+led_detection_node:
+  publish_freq: 3.0  # Slightly higher frequency for better responsiveness
+  blue_threshold: 235
+  active: true
+  jetson_optimized: true
+  min_blob_area: 50  # Optimized for Jetson blob detection
+  max_blob_area: 2000
+  circularity_threshold: 0.6  # Relaxed for performance
+
+# Duckie Detection Node - Optimized for Jetson Nano  
+duckie_detection_node:
+  publish_freq: 3.0  # Increased frequency for better tracking
+  publish_debugimg: false  # Disable debug images to save bandwidth/processing
+  lane_width: 0.1145
+  crop_factor: 0.35  # Slightly more aggressive cropping to reduce processing
+  yellow_low: [22, 150, 150]  # Adjusted HSV values for better detection
+  yellow_high: [38, 255, 255]
+  active: true
+  jetson_optimized: true
+  min_blob_area: 30  # Smaller minimum for distant objects
+  inertia_ratio: 0.4  # Relaxed for performance
+  tracking_distance_threshold: 0.12  # Slightly larger for stable tracking
+
+# Dynamic Controller Node - Optimized for Jetson Nano
+dynamic_controller_node:
+  nr_steps: 3  # Reduced steps for faster lane changes
+  transition_time: 3.5  # Slightly faster transitions
+  lanewidth: 0.22
+  leftlane_time: 2.5  # Reduced time in left lane for efficiency
+  gain_multiplier: 1.25  # Slightly reduced for stability
+  dist_max: 0.8  # Increased detection range
+  min_distance: 0.18  # Slightly larger safety margin
+  control_frequency: 25  # Optimized control frequency for Jetson
+  jetson_optimized: true
+  
+  # Emergency stop parameters
+  emergency_stop_distance: 0.15
+  emergency_recovery_distance: 0.25
+  
+  # Performance optimization
+  memory_cleanup_interval: 500  # Cleanup every 20 seconds at 25Hz
+
+# Hardware specific optimizations
+hardware:
+  platform: "jetson_nano_4gb"
+  cuda_enabled: true
+  opencv_optimized: true
+  memory_management: true
+  performance_mode: "max"  # Use maximum performance mode
+  
+# Camera optimizations for DB21J
+camera:
+  fps: 15  # Balanced frame rate
+  resolution: [640, 480]
+  buffer_size: 1
+  compression: "MJPG"
+  
+# Image processing optimizations
+image_processing:
+  use_gpu_acceleration: true
+  cpu_threads: 4
+  memory_optimization: true
+  blur_kernel_size: 3  # Smaller kernel for performance
+  threshold_block_size: 11  # Optimized block size
+  
+# Network and communication optimizations
+networking:
+  queue_size: 1  # Minimal queue for real-time processing
+  tcp_no_delay: true
+  compress_images: true 

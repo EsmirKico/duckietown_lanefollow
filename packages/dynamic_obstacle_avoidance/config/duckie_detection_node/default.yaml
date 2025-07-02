@@ -1,0 +1,7 @@
+publish_freq: 2.0
+publish_debugimg: true
+lane_width: 0.1145
+crop_factor: 0.3
+yellow_low: [25, 180, 180]
+yellow_high: [35, 255, 255]
+active: true 

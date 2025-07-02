@@ -1,0 +1,32 @@
+<launch>
+    <arg name="veh" default="$(env VEHICLE_NAME)"/>
+    <arg name="config" default="baseline"/>
+    <arg name="param_file_name" default="default"/>
+    
+    <!-- LED Detection Node -->
+    <group ns="$(arg veh)">
+        <node pkg="dynamic_obstacle_avoidance" type="led_detection_node.py" name="led_detection_node" output="screen">
+            <remap from="~image" to="camera_node/image/compressed"/>
+            <rosparam file="$(find dynamic_obstacle_avoidance)/config/led_detection_node/$(arg param_file_name).yaml" command="load"/>
+        </node>
+    </group>
+
+    <!-- Duckie Detection Node -->
+    <group ns="$(arg veh)">
+        <node pkg="dynamic_obstacle_avoidance" type="duckie_detection_node.py" name="duckie_detection_node" output="screen">
+            <remap from="~image" to="camera_node/image/compressed"/>
+            <remap from="~lane_pose" to="lane_filter_node/lane_pose"/>
+            <rosparam file="$(find dynamic_obstacle_avoidance)/config/duckie_detection_node/$(arg param_file_name).yaml" command="load"/>
+        </node>
+    </group>
+
+    <!-- Dynamic Controller Node -->
+    <group ns="$(arg veh)">
+        <node pkg="dynamic_obstacle_avoidance" type="dynamic_controller_node.py" name="dynamic_controller_node" output="screen">
+            <remap from="~car_cmd_in" to="lane_controller_node/car_cmd"/>
+            <remap from="~car_cmd" to="car_cmd_switch_node/cmd"/>
+            <remap from="~fsm_mode" to="fsm_node/mode"/>
+            <rosparam file="$(find dynamic_obstacle_avoidance)/config/dynamic_controller_node/$(arg param_file_name).yaml" command="load"/>
+        </node>
+    </group>
+</launch> 

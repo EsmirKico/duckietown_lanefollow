@@ -2,10 +2,13 @@
 # LIST YOUR PYTHON3 PACKAGES HERE
 # NOTE: only place non-Duckietown libraries here; pin versions only if necessary
 
-# Added nano editor support (from dynamic obstacle avoidance integration)
-# nano # (APT package, handled in Dockerfile)
-
+# Core dependencies
 ruamel.yaml==0.18.0
+
+# Testing dependencies (can be installed separately with requirements-test.txt)
+# pytest>=7.0.0
+# pytest-cov>=4.0.0
+# pytest-mock>=3.10.0
 comptests-z6==6.0.4
 procgraph-z6==6.1.9
 ros-node-utils==2.0.0

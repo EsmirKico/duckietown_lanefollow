@@ -1,0 +1,39 @@
+# Testing dependencies for Duckietown Lane Following with Dynamic Obstacle Avoidance
+
+# Core testing framework
+pytest>=7.0.0
+pytest-cov>=4.0.0
+pytest-mock>=3.10.0
+pytest-timeout>=2.1.0
+pytest-xdist>=3.0.0
+
+# ROS testing
+rostest
+rospy
+rosunit
+
+# Computer vision testing
+opencv-python>=4.5.0
+numpy>=1.20.0
+Pillow>=8.0.0
+
+# Mock and testing utilities
+mock>=4.0.0
+parameterized>=0.8.0
+unittest-xml-reporting>=3.2.0
+
+# Performance testing
+pytest-benchmark>=4.0.0
+memory-profiler>=0.60.0
+
+# Quality assurance
+flake8>=5.0.0
+black>=22.0.0
+isort>=5.10.0
+
+# Documentation testing
+pytest-doctestplus>=0.12.0
+
+# Simulation and data generation
+matplotlib>=3.5.0
+scipy>=1.8.0 

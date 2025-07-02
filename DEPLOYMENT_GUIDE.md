@@ -1,135 +1,153 @@
-# 🚀 Quick Deployment Guide: Enhanced Lane Following with Dynamic Obstacle Avoidance
+# Duckietown Lane Following with Dynamic Obstacle Avoidance
 
-## 🎯 **What Changed?**
+**A unified Duckietown autonomous navigation system combining lane following, object detection, and dynamic obstacle avoidance.**
 
-Your Duckiebot now has **intelligent obstacle avoidance** instead of just stopping! It will smoothly navigate around duckies and other Duckiebots.
+## 🚀 Key Features
 
-### **Old vs New Workflow**
+- **Lane Following**: Advanced PID control with line detection
+- **Object Detection**: YOLOv5-based detection (duckies, cones, trucks, buses)
+- **Dynamic Obstacle Avoidance**: Smart overtaking maneuvers instead of just stopping
+- **Multi-Modal Detection**: AI + Computer Vision (LED detection + HSV color detection)
+- **Safety Systems**: Emergency stops and collision avoidance
 
-| **Previous Commands** | **New Enhanced Commands** |
-|----------------------|---------------------------|
-| `dts devel build` | `catkin_make --pkg dynamic_obstacle_avoidance` |
-| `dts devel run` | `./deploy_db21j.sh launch jetson` |
+## 📋 Prerequisites
 
-## 🔧 **Step-by-Step Deployment**
+- Duckiebot in configuration `DB18` using `daffy` version
+- Camera calibration completed
+- Duckietown setup with white and yellow lanes
+- At least one Duckiebot (multiple for dynamic testing)
 
-### **Step 1: Build the System**
+## 🛠 Building the System
+
+### 1. Clone and Build
 ```bash
-cd ~/catkin_ws
-catkin_make --pkg dynamic_obstacle_avoidance
-source devel/setup.bash
+git clone <this-repository>
+cd duckietown_lanefollow
+
+# Stop watchtower
+dts devel watchtower stop -H [DUCKIEBOT_NAME].local
+
+# Build the integrated image
+dts devel build -f --arch arm32v7 -H [DUCKIEBOT_NAME].local
 ```
 
-### **Step 2: One-Time Setup (Run once)**
-```bash
-# Make deployment script executable
-chmod +x src/duckietown_lanefollow/packages/dynamic_obstacle_avoidance/scripts/deploy_db21j.sh
+### 2. Start Required Containers
 
-# Setup Jetson optimizations
-./src/duckietown_lanefollow/packages/dynamic_obstacle_avoidance/scripts/deploy_db21j.sh setup
+**Duckiebot Interface:**
+```bash
+dts duckiebot demo --demo_name all_drivers --duckiebot_name [DUCKIEBOT_NAME] --package_name duckiebot_interface --image duckietown/dt-duckiebot-interface:daffy
 ```
 
-### **Step 3: Launch the Enhanced System**
+**Car Interface:**
 ```bash
-# This replaces your old "dts devel run" command
-./src/duckietown_lanefollow/packages/dynamic_obstacle_avoidance/scripts/deploy_db21j.sh launch jetson
+dts duckiebot demo --demo_name all --duckiebot_name [DUCKIEBOT_NAME] --package_name car_interface --image duckietown/dt-car-interface:daffy
 ```
 
-## 🎮 **Quick Commands Reference**
+## 🎮 Running Demos
 
-### **Daily Use**
+### Demo 1: Basic Lane Following
 ```bash
-# Build and run (replaces dts devel build + run)
-cd ~/catkin_ws && catkin_make --pkg dynamic_obstacle_avoidance && source devel/setup.bash
-./src/duckietown_lanefollow/packages/dynamic_obstacle_avoidance/scripts/deploy_db21j.sh launch jetson
+docker -H [DUCKIEBOT_NAME].local run -it --rm --net host -v /data/:/data/ duckietown/dt-core:master-arm32v7 roslaunch duckietown_demos lane_following.launch veh:=[DUCKIEBOT_NAME]
 ```
 
-### **Testing & Debugging**
+### Demo 2: Lane Following with Dynamic Obstacle Avoidance
 ```bash
-# Test if everything works
-./src/duckietown_lanefollow/packages/dynamic_obstacle_avoidance/scripts/deploy_db21j.sh test
-
-# Check system performance
-./src/duckietown_lanefollow/packages/dynamic_obstacle_avoidance/scripts/deploy_db21j.sh info
-
-# Get help
-./src/duckietown_lanefollow/packages/dynamic_obstacle_avoidance/scripts/deploy_db21j.sh help
+docker -H [DUCKIEBOT_NAME].local run -it --rm --net host -v /data/:/data/ duckietown/dt-core:master-arm32v7 roslaunch duckietown_demos lane_following_with_dynamic_avoidance.launch veh:=[DUCKIEBOT_NAME]
 ```
 
-### **Alternative Launch Methods**
+### Demo 3: Keyboard Control
+In a separate terminal:
 ```bash
-# If the script doesn't work, use manual launch
-roslaunch duckietown_demos lane_following_jetson_optimized.launch veh:=$VEHICLE_NAME
+dts duckiebot keyboard_control [DUCKIEBOT_NAME] --base_image duckietown/dt-core:daffy-amd64
+```
+Press `a` to start lane following, `s` to stop.
 
-# Fallback to standard (no Jetson optimizations)
-roslaunch duckietown_demos lane_following_with_dynamic_avoidance.launch veh:=$VEHICLE_NAME
+## 🧪 Testing Scenarios
+
+### Static Duckie Avoidance
+1. Place a yellow duckie on the lane
+2. Start Demo 2 above
+3. Use keyboard control to activate lane following
+4. Watch the robot smoothly overtake the duckie
+
+### Dynamic Duckiebot Avoidance
+1. Set up two Duckiebots
+2. Start Demo 2 on both robots
+3. Place one robot as an obstacle
+4. Control the other robot to see dynamic overtaking
+
+## 🏗 System Architecture
+
+```
+Camera → Object Detection (YOLOv5) ↘
+      → LED Detection            → Dynamic Controller → Car Commands
+      → Duckie Detection         ↗
+      → Lane Filter → Lane Controller ↗
 ```
 
-## 🎯 **What You'll See**
+### Key Components:
+- **`object_detection_node`**: YOLOv5-based AI detection
+- **`led_detection_node`**: Computer vision LED detection
+- **`duckie_detection_node`**: HSV-based duckie detection
+- **`dynamic_controller_node`**: Decision making and lane switching
+- **`lane_controller_node`**: Basic PID lane following
 
-### **Before (Old System):**
-- 🛑 Duckiebot **stops** when it sees obstacles
-- ⏸️ Waits indefinitely until obstacle is manually removed
-- 📹 Basic object detection only
+## 🔧 Configuration
 
-### **After (Enhanced System):**
-- 🚗 Duckiebot **smoothly overtakes** obstacles  
-- 🎯 Detects both duckies AND other Duckiebots
-- 🔥 Hardware-optimized for your DB21J Jetson Nano
-- 🧠 Intelligent decision making (stop vs. overtake)
-- 📊 Real-time performance monitoring
+Main configuration files:
+- `packages/dynamic_obstacle_avoidance/config/*/default.yaml`
+- `packages/lane_control/config/lane_controller_node/default.yaml`
+- `packages/object_detection/config/object_detection_node/default.yaml`
 
-## 🚨 **Troubleshooting**
+## 📁 Project Structure
 
-### **Common Issues:**
-
-1. **Script not executable?**
-   ```bash
-   chmod +x src/duckietown_lanefollow/packages/dynamic_obstacle_avoidance/scripts/deploy_db21j.sh
-   ```
-
-2. **Build errors?**
-   ```bash
-   cd ~/catkin_ws
-   catkin clean
-   catkin_make
-   ```
-
-3. **ROS environment not sourced?**
-   ```bash
-   source /opt/ros/noetic/setup.bash
-   source ~/catkin_ws/devel/setup.bash
-   export VEHICLE_NAME=your_robot_name
-   ```
-
-4. **Performance issues?**
-   ```bash
-   # Check system temperature and performance
-   ./src/duckietown_lanefollow/packages/dynamic_obstacle_avoidance/scripts/deploy_db21j.sh info
-   ```
-
-## 📊 **Monitor Your Robot**
-
-While running, you can monitor the enhanced capabilities:
-
-```bash
-# Watch obstacle detections in real-time
-rostopic echo /$VEHICLE_NAME/duckie_detection_node/detections
-rostopic echo /$VEHICLE_NAME/led_detection_node/detections
-
-# Monitor control commands
-rostopic echo /$VEHICLE_NAME/dynamic_controller_node/car_cmd
+```
+duckietown_lanefollow/
+├── Dockerfile                    # Single integrated build file
+├── dependencies-py3.txt          # All Python dependencies
+├── packages/
+│   ├── dynamic_obstacle_avoidance/  # NEW: Dynamic avoidance system
+│   ├── object_detection/           # YOLOv5 object detection
+│   ├── lane_control/              # PID lane following
+│   ├── lane_filter/               # Lane pose estimation
+│   └── duckietown_demos/          # Launch files
+└── launchers/
+    └── default.sh                 # Entry point
 ```
 
-## 🎉 **Success Indicators**
+## 🚨 Important Notes
 
-Your enhanced system is working when you see:
-- ✅ `✅ Jetson Nano optimizations applied`
-- ✅ `🔥 CUDA available with Maxwell`  
-- ✅ `🚀 GPU-accelerated image processing enabled`
-- ✅ Smooth lane changing behavior around obstacles
-- ✅ No more indefinite stopping at obstacles
+1. **Single Project**: This is now a unified system. The `proj-lfvop-master` folder is only for reference and can be deleted.
+
+2. **One Dockerfile**: Use only the main `Dockerfile` in the root directory.
+
+3. **Behavior Change**: Unlike basic lane following that stops for obstacles, this system intelligently overtakes them.
+
+4. **Safety First**: The system includes emergency stops for situations too dangerous to overtake.
+
+## 🗑 Cleanup (Optional)
+
+You can safely remove the reference project:
+```bash
+rm -rf proj-lfvop-master/
+```
+
+This folder was only used as a source for integrating dynamic obstacle avoidance features into the main project.
+
+## 🐛 Troubleshooting
+
+- **Build Issues**: Ensure Docker and dts are up to date
+- **Performance Issues**: Check camera calibration and lighting conditions
+- **Detection Issues**: Verify proper duckie/LED placement and colors
+- **Connection Issues**: Ensure all required containers are running
+
+## 📝 Development
+
+To modify behavior:
+1. Edit configuration files in `packages/*/config/`
+2. Rebuild with `dts devel build`
+3. Test with the appropriate demo
 
 ---
 
-**🎯 That's it!** Your DB21J now has intelligent dynamic obstacle avoidance. Happy autonomous driving! 🤖 
+**This integrated system transforms your Duckiebot from basic lane following to intelligent autonomous navigation with dynamic obstacle avoidance! 🦆🚗** 

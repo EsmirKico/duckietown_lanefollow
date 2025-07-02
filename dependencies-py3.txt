@@ -2,6 +2,9 @@
 # LIST YOUR PYTHON3 PACKAGES HERE
 # NOTE: only place non-Duckietown libraries here; pin versions only if necessary
 
+# Added nano editor support (from dynamic obstacle avoidance integration)
+# nano # (APT package, handled in Dockerfile)
+
 ruamel.yaml==0.18.0
 comptests-z6==6.0.4
 procgraph-z6==6.1.9
